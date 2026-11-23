@@ -44,7 +44,12 @@ function Package {
 
     Install-BuildDependencies -WingetFile "${ScriptHome}/.Wingetfile"
 
-    $GitDescription = Invoke-External git describe --tags --long
+    $GitDescription = & git describe --tags --long 2>$null
+    if ( $LASTEXITCODE -ne 0 -or -not $GitDescription ) {
+        # Fork without upstream tags: synthesize a description
+        $ShortHash = (& git rev-parse --short=9 HEAD)
+        $GitDescription = "33.0.3-sleek-1-g${ShortHash}"
+    }
     $Tokens = ($GitDescription -split '-')
     $CommitVersion = $Tokens[0..$($Tokens.Count - 3)] -join '-'
     $CommitHash = $($Tokens[-1]).SubString(1)
