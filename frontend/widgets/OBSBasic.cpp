@@ -59,6 +59,7 @@
 
 #include <QActionGroup>
 #include <QThread>
+#include <QToolBar>
 #include <QWidgetAction>
 
 #include <mutex>
@@ -238,9 +239,9 @@ OBSBasic::OBSBasic(QWidget *parent) : OBSMainWindow(parent), undo_s(ui), ui(new 
 	/* Main window default layout */
 	setDockCornersVertical(true);
 
-	/* Scenes and Sources dock on left
-	 * This specific arrangement can't be set up in Qt Designer */
-	addDockWidget(Qt::LeftDockWidgetArea, ui->scenesDock);
+	/* Scenes and Sources dock on the right (Studio layout), with the icon
+	 * rail on the left. This specific arrangement can't be set up in Qt Designer */
+	addDockWidget(Qt::RightDockWidgetArea, ui->scenesDock);
 	splitDockWidget(ui->scenesDock, ui->sourcesDock, Qt::Vertical);
 	int sideDockWidth = std::min(width() * 30 / 100, 320);
 	resizeDocks({ui->scenesDock, ui->sourcesDock}, {sideDockWidth, sideDockWidth}, Qt::Horizontal);
@@ -419,6 +420,8 @@ OBSBasic::OBSBasic(QWidget *parent) : OBSMainWindow(parent), undo_s(ui), ui(new 
 	SETUP_DOCK(controlsDock);
 	SETUP_DOCK(statsDock);
 #undef SETUP_DOCK
+
+	SetupStudioRail();
 
 	// Register shortcuts for Undo/Redo
 	ui->actionMainUndo->setShortcut(Qt::CTRL | Qt::Key_Z);
@@ -2098,4 +2101,52 @@ OBSPromptResult OBSBasic::PromptForName(const OBSPromptRequest &request, const O
 void OBSBasic::on_actionOpenPluginManager_triggered()
 {
 	App()->pluginManagerOpenDialog();
+}
+
+/* Studio layout: a slim left rail that shows/hides the existing docks and
+ * opens Settings. Every dock and action stays available; this only adds a
+ * faster way to reach them. */
+void OBSBasic::SetupStudioRail()
+{
+	QToolBar *rail = new QToolBar(QStringLiteral("Studio rail"), this);
+	rail->setObjectName(QStringLiteral("studioRail"));
+	rail->setMovable(false);
+	rail->setFloatable(false);
+	rail->setOrientation(Qt::Vertical);
+	rail->setToolButtonStyle(Qt::ToolButtonIconOnly);
+	rail->setIconSize(QSize(20, 20));
+	rail->setContextMenuPolicy(Qt::PreventContextMenu);
+	rail->setStyleSheet(QStringLiteral("QToolBar#studioRail { background: #0A0A0C; border: none;"
+					   " border-right: 1px solid #2A2A2F; padding: 8px 6px; spacing: 6px; }"
+					   "QToolBar#studioRail QToolButton { width: 36px; height: 36px; border: none;"
+					   " border-radius: 8px; background: transparent; }"
+					   "QToolBar#studioRail QToolButton:hover { background: #212125; }"
+					   "QToolBar#studioRail QToolButton:checked { background: palette(highlight); }"));
+
+	auto addDockToggle = [this, rail](QDockWidget *dock, const char *icon) {
+		QAction *action = rail->addAction(QIcon(QStringLiteral("theme:Dark/") + QString::fromUtf8(icon)),
+						  dock->windowTitle());
+		action->setToolTip(dock->windowTitle());
+		action->setCheckable(true);
+		action->setChecked(dock->isVisible());
+		connect(action, &QAction::triggered, dock, &QDockWidget::setVisible);
+		connect(dock, &QDockWidget::visibilityChanged, action, &QAction::setChecked);
+	};
+
+	addDockToggle(ui->scenesDock, "layout-vertical.svg");
+	addDockToggle(ui->sourcesDock, "visible.svg");
+	addDockToggle(ui->mixerDock, "headphones.svg");
+	addDockToggle(ui->transitionsDock, "updown.svg");
+	addDockToggle(controlsDock, "streaming-inactive.svg");
+	addDockToggle(statsDock, "refresh.svg");
+
+	QWidget *spacer = new QWidget(rail);
+	spacer->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Expanding);
+	rail->addWidget(spacer);
+
+	QAction *settings = rail->addAction(QIcon(QStringLiteral("theme:Dark/cogs.svg")), QTStr("Settings"));
+	settings->setToolTip(QTStr("Settings"));
+	connect(settings, &QAction::triggered, this, &OBSBasic::on_action_Settings_triggered);
+
+	addToolBar(Qt::LeftToolBarArea, rail);
 }

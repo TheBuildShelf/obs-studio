@@ -424,6 +424,7 @@ private:
 	void SourceToolBarActionsSetEnabled();
 
 	void copyActionsDynamicProperties();
+	void SetupStudioRail();
 	std::optional<QWidget *> createContextBarWidget(obs_source_t *source);
 
 private slots:
