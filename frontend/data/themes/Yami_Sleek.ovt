@@ -1,0 +1,161 @@
+/* Sleek: a flat, modern variant of Yami.
+ * Neutral near-black surfaces, a single orange accent, borderless panels,
+ * underline tabs and slim scrollbars. */
+
+@OBSThemeMeta {
+    name: 'Sleek';
+    id: 'com.obsproject.Yami.Sleek';
+    extends: 'com.obsproject.Yami';
+    author: 'Sleek';
+    dark: 'true';
+}
+
+@OBSThemeVars {
+    /* Neutral surface ramp (no blue tint) */
+    --grey1: #5A5A62;
+    --grey2: #46464D;
+    --grey3: #36363C;
+    --grey4: #2A2A2F;
+    --grey5: #212125;
+    --grey6: #19191C;
+    --grey7: #121214;
+    --grey8: #0A0A0C;
+
+    /* Orange accent */
+    --orange1: #FF9A5C;
+    --orange2: #FF8236;
+    --orange3: #F26B1D;
+    --orange4: #CC5812;
+    --orange5: #9E440E;
+    --orange6: #6E2F0A;
+
+    --primary: var(--orange3);
+    --primary_light: var(--orange2);
+    --primary_lighter: var(--orange1);
+    --primary_dark: var(--orange4);
+    --primary_darker: var(--orange5);
+
+    --palette_link: var(--orange1);
+    --palette_linkVisited: var(--orange1);
+
+    --text: #ECECEF;
+    --text_light: #FFFFFF;
+    --text_muted: #8E8E98;
+
+    /* Softer, slightly rounder controls with quiet borders */
+    --border_radius: 6px;
+    --border_radius_small: 4px;
+    --border_radius_large: 10px;
+    --border_color: var(--grey4);
+
+    --input_bg: var(--grey5);
+    --input_bg_hover: var(--grey4);
+    --input_bg_focus: var(--grey6);
+    --input_border: var(--grey4);
+    --input_border_hover: var(--grey2);
+    --input_border_focus: var(--primary);
+
+    --button_bg: var(--grey4);
+    --button_bg_hover: var(--grey3);
+    --button_bg_down: var(--grey6);
+    --button_bg_disabled: var(--grey5);
+    --button_border: var(--grey4);
+    --button_border_hover: var(--grey2);
+
+    --tab_bg: transparent;
+    --tab_bg_hover: var(--grey5);
+    --tab_border: transparent;
+    --tab_border_hover: transparent;
+
+    --scrollbar_size: 8px;
+    --scrollbar_bg: transparent;
+    --scrollbar_handle: var(--grey3);
+    --scrollbar_hover: var(--grey2);
+    --scrollbar_down: var(--grey1);
+    --scrollbar_border: transparent;
+
+    --list_item_bg_selected: var(--orange5);
+    --list_item_bg_hover: var(--grey4);
+}
+
+/* ---- Docks: flat header bar, no outlined box ---- */
+QDockWidget {
+    font-weight: 600;
+}
+
+QDockWidget::title {
+    background-color: var(--grey6);
+    border: none;
+    border-bottom: 1px solid var(--grey4);
+    border-radius: 0px;
+    padding: var(--padding_large) var(--padding_wide);
+    text-transform: uppercase;
+}
+
+/* ---- Tabs: quiet text with an accent underline ---- */
+QTabBar::tab {
+    background: transparent;
+    border: none;
+    border-bottom: 2px solid transparent;
+    border-radius: 0px;
+    margin: 0px 2px;
+    color: var(--text_muted);
+}
+
+QTabBar::tab:hover {
+    background: var(--grey5);
+    border-bottom-color: var(--grey2);
+    color: var(--text);
+}
+
+QTabBar::tab:selected {
+    background: transparent;
+    border-bottom: 2px solid var(--primary);
+    color: var(--text_light);
+}
+
+/* ---- Buttons: borderless fill; accent when active ---- */
+QPushButton {
+    border: 1px solid transparent;
+    font-weight: 500;
+}
+
+QPushButton:hover,
+QPushButton:focus {
+    border-color: var(--grey2);
+}
+
+QPushButton:checked {
+    background-color: var(--primary);
+    border-color: transparent;
+    color: #FFFFFF;
+}
+
+QPushButton:checked:hover {
+    background-color: var(--primary_light);
+}
+
+/* ---- Menus: floating, softly rounded ---- */
+QMenu {
+    background-color: var(--grey6);
+    border: 1px solid var(--grey4);
+    border-radius: var(--border_radius_large);
+    padding: 4px;
+}
+
+QMenu::item {
+    border-radius: var(--border_radius);
+    padding: 6px 20px 6px 12px;
+}
+
+QMenu::item:selected {
+    background-color: var(--grey4);
+}
+
+/* ---- Scrollbars: slim pills ---- */
+QScrollBar::handle:vertical,
+QScrollBar::handle:horizontal {
+    border-radius: 4px;
+    min-height: 24px;
+    min-width: 24px;
+}
