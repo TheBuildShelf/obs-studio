@@ -1,0 +1,16 @@
+name: Sleek Build
+run-name: Sleek build (${{ github.ref_name }}) 🧱
+on:
+  push:
+    branches:
+      - sleek-ui
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  build-project:
+    name: Build 🧱
+    uses: ./.github/workflows/build-project.yaml
+    secrets: inherit
+    permissions:
+      contents: read
