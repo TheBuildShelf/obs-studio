@@ -40,6 +40,9 @@
 #include <util/util.hpp>
 
 #include <QAccessible>
+#include <QAction>
+#include <QHash>
+#include <QToolBar>
 #include <QPointer>
 #include <QSystemTrayIcon>
 
@@ -425,6 +428,11 @@ private:
 
 	void copyActionsDynamicProperties();
 	void SetupStudioRail();
+	QToolBar *studioRail = nullptr;
+	QAction *studioRailSpacer = nullptr;
+	QHash<QDockWidget *, QAction *> studioRailDockActions;
+	void AddStudioRailDock(QDockWidget *dock);
+	void RemoveStudioRailDock(QDockWidget *dock);
 	std::optional<QWidget *> createContextBarWidget(obs_source_t *source);
 
 private slots:

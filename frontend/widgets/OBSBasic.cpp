@@ -2109,6 +2109,7 @@ void OBSBasic::on_actionOpenPluginManager_triggered()
 void OBSBasic::SetupStudioRail()
 {
 	QToolBar *rail = new QToolBar(QStringLiteral("Studio rail"), this);
+	studioRail = rail;
 	rail->setObjectName(QStringLiteral("studioRail"));
 	rail->setMovable(false);
 	rail->setFloatable(false);
@@ -2142,7 +2143,7 @@ void OBSBasic::SetupStudioRail()
 
 	QWidget *spacer = new QWidget(rail);
 	spacer->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Expanding);
-	rail->addWidget(spacer);
+	studioRailSpacer = rail->addWidget(spacer);
 
 	QAction *settings = rail->addAction(QIcon(QStringLiteral("theme:Dark/cogs.svg")), QTStr("Settings"));
 	settings->setToolTip(QTStr("Settings"));

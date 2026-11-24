@@ -21,6 +21,14 @@
 
 #include <qt-wrappers.hpp>
 
+#include <QAction>
+#include <QColor>
+#include <QFont>
+#include <QIcon>
+#include <QPainter>
+#include <QPixmap>
+#include <QToolBar>
+
 void setupDockAction(QDockWidget *dock)
 {
 	QAction *action = dock->toggleViewAction();
@@ -155,6 +163,7 @@ void OBSBasic::AddDockWidget(QDockWidget *dock, Qt::DockWidgetArea area, bool ex
 	setupDockAction(dock);
 	dock->setFeatures(features);
 	addDockWidget(area, dock);
+	AddStudioRailDock(dock);
 
 #ifdef BROWSER_AVAILABLE
 	if (extraBrowser && extraBrowserMenuDocksSeparator.isNull()) {
@@ -185,11 +194,13 @@ void OBSBasic::RemoveDockWidget(const QString &name)
 	if (extraDockNames.contains(name)) {
 		int idx = extraDockNames.indexOf(name);
 		extraDockNames.removeAt(idx);
+		RemoveStudioRailDock(extraDocks[idx].get());
 		extraDocks[idx].reset();
 		extraDocks.removeAt(idx);
 	} else if (extraCustomDockNames.contains(name)) {
 		int idx = extraCustomDockNames.indexOf(name);
 		extraCustomDockNames.removeAt(idx);
+		RemoveStudioRailDock(extraCustomDocks[idx]);
 		removeDockWidget(extraCustomDocks[idx]);
 		extraCustomDocks.removeAt(idx);
 	}
@@ -226,6 +237,7 @@ void OBSBasic::AddCustomDockWidget(QDockWidget *dock)
 
 	extraCustomDockNames.push_back(dock->objectName());
 	extraCustomDocks.push_back(dock);
+	AddStudioRailDock(dock);
 }
 
 void OBSBasic::setDockCornersVertical(bool vertical)
@@ -257,4 +269,53 @@ void OBSBasic::RepairCustomExtraDockName()
 	blog(LOG_WARNING, "The custom dock '%s' got its object name restored", QT_TO_UTF8(extraCustomDockNames[idx]));
 
 	dock->setObjectName(extraCustomDockNames[idx]);
+}
+
+/* Studio rail support for plugin docks (e.g. Aitum Vertical). Each dock gets a
+ * rail button with a letter badge that shows/hides it. */
+void OBSBasic::AddStudioRailDock(QDockWidget *dock)
+{
+	if (!studioRail || !dock || studioRailDockActions.contains(dock)) {
+		return;
+	}
+
+	QString title = dock->windowTitle().trimmed();
+	QString letter = title.isEmpty() ? QStringLiteral("?") : title.left(1).toUpper();
+
+	QPixmap pix(40, 40);
+	pix.fill(Qt::transparent);
+	{
+		QPainter painter(&pix);
+		painter.setRenderHint(QPainter::Antialiasing);
+		painter.setPen(QPen(QColor(0xFF, 0xFF, 0xFF, 0xB0), 2));
+		painter.setBrush(Qt::NoBrush);
+		painter.drawRoundedRect(QRectF(4, 4, 32, 32), 8, 8);
+		QFont font = painter.font();
+		font.setBold(true);
+		font.setPixelSize(18);
+		painter.setFont(font);
+		painter.setPen(QColor(0xFF, 0xFF, 0xFF));
+		painter.drawText(QRect(0, 0, 40, 40), Qt::AlignCenter, letter);
+	}
+
+	QAction *action = new QAction(QIcon(pix), title, studioRail);
+	action->setToolTip(title);
+	action->setCheckable(true);
+	action->setChecked(dock->isVisible());
+	connect(action, &QAction::triggered, dock, &QDockWidget::setVisible);
+	connect(dock, &QDockWidget::visibilityChanged, action, &QAction::setChecked);
+	connect(dock, &QDockWidget::windowTitleChanged, action, &QAction::setToolTip);
+
+	/* Keep the settings button (and spacer) pinned at the bottom */
+	studioRail->insertAction(studioRailSpacer, action);
+	studioRailDockActions.insert(dock, action);
+}
+
+void OBSBasic::RemoveStudioRailDock(QDockWidget *dock)
+{
+	QAction *action = studioRailDockActions.take(dock);
+	if (action) {
+		studioRail->removeAction(action);
+		delete action;
+	}
 }
